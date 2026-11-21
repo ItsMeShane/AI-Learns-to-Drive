@@ -1,0 +1,125 @@
+body{
+    margin:0;
+    background:#1e1e1e;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+}
+
+button{
+    border:none;
+    border-radius:6px;
+    padding:6px 12px;
+    background:#3a3a3a;
+    color:#eee;
+    font:12px sans-serif;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+}
+button:hover{
+    background:#555;
+}
+button:active{
+    transform:scale(0.95);
+}
+button:focus-visible{
+    outline:2px solid #8ab4f8;
+    outline-offset:1px;
+}
+/* red on hover: this throws the training away */
+#resetButton:hover{
+    background:#8b2f2f;
+}
+
+#networkCanvas{
+    background:black;
+}
+#networkPanel{
+    display:flex;
+    flex-direction:column;
+}
+#controlBar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    height:44px;
+    box-sizing:border-box;
+    padding:0 12px;
+    background:#111;
+    border-top:1px solid #333;
+    color:#eee;
+    font:12px sans-serif;
+}
+#mutationSlider{
+    flex:1;
+    width:0;
+    min-width:0;
+    accent-color:#8ab4f8;
+    cursor:pointer;
+}
+#mutationValue{
+    width:2.5em;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+}
+#carCanvas{
+    background:#333;
+}
+
+#toast{
+    position:fixed;
+    top:16px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:8px 14px;
+    border-radius:6px;
+    background:rgba(0,0,0,0.85);
+    color:#fff;
+    font:14px sans-serif;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s;
+}
+#toast.show{
+    opacity:1;
+}
+body.banner-shown #toast{
+    top:104px;
+}
+
+#banner{
+    position:fixed;
+    top:16px;
+    left:50%;
+    transform:translate(-50%,-8px);
+    width:max-content;
+    max-width:min(500px,calc(100vw - 32px));
+    box-sizing:border-box;
+    padding:12px 20px;
+    border:1px solid #d4af37;
+    border-radius:8px;
+    background:rgba(10,10,10,0.92);
+    box-shadow:0 6px 24px rgba(0,0,0,0.5);
+    color:#fff;
+    font:14px sans-serif;
+    text-align:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s, transform .3s;
+}
+#banner.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+#bannerTitle{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+#bannerDetail{
+    color:#ccc;
+    font-size:13px;
+}
