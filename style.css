@@ -42,15 +42,58 @@ button:focus-visible{
 }
 #controlBar{
     display:flex;
-    align-items:center;
-    gap:10px;
-    height:44px;
+    flex-direction:column;
+    gap:8px;
     box-sizing:border-box;
-    padding:0 12px;
+    padding:10px 12px;
     background:#111;
     border-top:1px solid #333;
     color:#eee;
     font:12px sans-serif;
+}
+.controlRow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.controlLabel{
+    width:5em;
+    flex-shrink:0;
+}
+#resetButton{
+    margin-left:auto;
+}
+
+#speedOptions{
+    position:relative;
+    display:flex;
+    border-radius:6px;
+    overflow:hidden;
+}
+#speedOptions input{
+    position:absolute;
+    opacity:0;
+    width:0;
+    height:0;
+    margin:0;
+}
+#speedOptions label{
+    padding:6px 10px;
+    background:#3a3a3a;
+    cursor:pointer;
+    font-variant-numeric:tabular-nums;
+    transition:background .15s;
+}
+#speedOptions label:hover{
+    background:#555;
+}
+#speedOptions input:checked+label{
+    background:#8ab4f8;
+    color:#111;
+}
+#speedOptions input:focus-visible+label{
+    outline:2px solid #eee;
+    outline-offset:-2px;
 }
 #mutationSlider{
     flex:1;

@@ -29,6 +29,16 @@ const STALL_FRAMES=180;
 
 const AUTO_NEXT_DELAY=1200;
 
+const STEPS_PER_SECOND=60;
+const STEP_MS=1000/STEPS_PER_SECOND;
+const STEP_TOLERANCE_MS=1;
+const MAX_CATCHUP_MS=250;
+let lastTime=null;
+let pendingMs=0;
+
+const SPEEDS=[1,2,4];
+let speed=loadSpeed();
+
 const cars=generateCars(trained?1:N);
 let bestCar=cars[0];
 let aliveCount=cars.length;
@@ -84,7 +94,24 @@ mutationSlider.addEventListener("change",()=>{
         " applies "+when);
 });
 
-animate();
+// applies straight away and is kept across generations
+for(const option of SPEEDS){
+    const radio=document.getElementById("speed"+option);
+    radio.checked=option==speed;
+    radio.addEventListener("change",()=>{
+        speed=option;
+        localStorage.setItem("speed",option);
+    });
+}
+
+step();
+draw(0);
+requestAnimationFrame(animate);
+
+function loadSpeed(){
+    const stored=Number(localStorage.getItem("speed"));
+    return SPEEDS.includes(stored)?stored:1;
+}
 
 function loadMutation(){
     const stored=localStorage.getItem("mutation");
@@ -243,9 +270,8 @@ function drawStats(ctx){
     }
 }
 
-// game time, counted in frames so it's the same at any refresh rate
-function formatTime(frames){
-    return (frames/60).toFixed(1)+"s";
+function formatTime(steps){
+    return (steps/STEPS_PER_SECOND).toFixed(1)+"s";
 }
 
 // checkered band across the road, centered on the followed car's finish line
@@ -266,6 +292,20 @@ function drawFinishLine(ctx){
 }
 
 function animate(time){
+    if(lastTime===null){
+        lastTime=time;
+    }
+    pendingMs+=Math.min(time-lastTime,MAX_CATCHUP_MS)*speed;
+    lastTime=time;
+    while(pendingMs>=STEP_MS-STEP_TOLERANCE_MS){
+        step();
+        pendingMs-=STEP_MS;
+    }
+    draw(time);
+    requestAnimationFrame(animate);
+}
+
+function step(){
     frame++;
     // once a car wins, every car (traffic too) stops where it is
     if(!winner){
@@ -312,7 +352,9 @@ function animate(time){
             }
         }
     }
+}
 
+function draw(time){
     // the network canvas shares its column with the control bar
     const controlHeight=controlBar.offsetHeight;
     carCanvas.height=window.innerHeight;
@@ -348,5 +390,4 @@ function animate(time){
 
     networkCtx.lineDashOffset=-time/50;
     Visualizer.drawNetwork(networkCtx,bestCar.brain);
-    requestAnimationFrame(animate);
 }
