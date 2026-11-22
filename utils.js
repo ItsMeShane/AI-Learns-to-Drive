@@ -2,9 +2,10 @@ function lerp(A,B,t){
     return A+(B-A)*t;
 }
 
-// a random number from a bell curve around 0: usually between -1 and 1,
-// rarely past -2 or 2 (the Box-Muller transform; 1-random avoids log(0))
-// puts the array in a random order, in place
+function clamp(value,min,max){
+    return Math.max(min,Math.min(max,value));
+}
+
 function shuffle(array){
     for(let i=array.length-1;i>0;i--){
         const j=Math.floor(Math.random()*(i+1));

@@ -142,28 +142,68 @@ class Car{
         this.y-=Math.cos(this.angle)*this.speed;
     }
 
-    draw(ctx,drawSensor=false){
+    draw(ctx,drawSensor=false,focusInput=null){
         if(this.sensor && drawSensor){
-            this.sensor.draw(ctx);
+            const ray=focusInput!==null&&focusInput<this.sensor.rayCount
+                ?focusInput
+                :null;
+            this.sensor.draw(ctx,ray);
         }
 
         ctx.save();
         ctx.translate(this.x,this.y);
         ctx.rotate(-this.angle);
+        this.drawBody(ctx,0,0,this.width,this.height);
+        ctx.restore();
+    }
+
+    drawBody(ctx,x,y,width,height){
         if(!this.damaged){
             ctx.drawImage(this.mask,
-                -this.width/2,
-                -this.height/2,
-                this.width,
-                this.height);
+                x-width/2,
+                y-height/2,
+                width,
+                height);
             ctx.globalCompositeOperation="multiply";
         }
         ctx.drawImage(this.img,
-            -this.width/2,
-            -this.height/2,
-            this.width,
-            this.height);
-        ctx.restore();
+            x-width/2,
+            y-height/2,
+            width,
+            height);
+        ctx.globalCompositeOperation="source-over";
+    }
 
+    describeInput(i){
+        const value=this.brain.levels[0].inputs[i]??0;
+        const sent="  →  "+value.toFixed(2);
+        if(i<this.sensor.rayCount){
+            const angle=this.sensor.getRayAngle(i);
+            const degrees=Math.round(Math.abs(angle)*180/Math.PI);
+            const direction=degrees==0
+                ?"straight ahead"
+                :degrees+"° "+(angle>0?"left":"right");
+            const reading=this.sensor.readings[i];
+            const seen=reading
+                ?(reading.type=="car"?"Car ":"Road edge ")+
+                    Math.round(reading.offset*this.sensor.rayLength)+"px away"
+                :"Nothing within "+this.sensor.rayLength+"px";
+            return {
+                title:"Sensor ray, "+direction,
+                detail:seen+sent,
+                hint:"1 = touching it, 0 = nothing in range"
+            };
+        }
+        let detail="Stopped";
+        if(this.speed>0){
+            detail=this.speed.toFixed(1)+" of "+this.maxSpeed.toFixed(1)+" max";
+        }else if(this.speed<0){
+            detail="Reversing at "+(-this.speed).toFixed(1);
+        }
+        return {
+            title:"Speed",
+            detail:detail+sent,
+            hint:"1 = top speed, below 0 = reversing"
+        };
     }
 }

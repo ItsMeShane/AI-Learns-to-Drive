@@ -34,6 +34,7 @@ class Sensor{
                 roadBorders[i][1]
             );
             if(touch){
+                touch.type="edge";
                 touches.push(touch);
             }
         }
@@ -48,6 +49,7 @@ class Sensor{
                     poly[(j+1)%poly.length]
                 );
                 if(value){
+                    value.type="car";
                     touches.push(value);
                 }
             }
@@ -62,14 +64,19 @@ class Sensor{
         }
     }
 
+    // which way ray i points compared to the car, positive is to the left
+    getRayAngle(i){
+        return lerp(
+            this.raySpread/2,
+            -this.raySpread/2,
+            this.rayCount==1?0.5:i/(this.rayCount-1)
+        );
+    }
+
     #castRays(){
         this.rays=[];
         for(let i=0;i<this.rayCount;i++){
-            const rayAngle=lerp(
-                this.raySpread/2,
-                -this.raySpread/2,
-                this.rayCount==1?0.5:i/(this.rayCount-1)
-            )+this.car.angle;
+            const rayAngle=this.getRayAngle(i)+this.car.angle;
 
             const start={x:this.car.x, y:this.car.y};
             const end={
@@ -82,15 +89,21 @@ class Sensor{
         }
     }
 
-    draw(ctx){
+    // highlight is the index of one ray to pick out from the rest, or null
+    draw(ctx,highlight=null){
         for(let i=0;i<this.rayCount;i++){
             let end=this.rays[i][1];
             if(this.readings[i]){
                 end=this.readings[i];
             }
+            const picked=i===highlight;
+            ctx.save();
+            if(highlight!==null&&!picked){
+                ctx.globalAlpha*=0.3;
+            }
 
             ctx.beginPath();
-            ctx.lineWidth=2;
+            ctx.lineWidth=picked?4:2;
             ctx.strokeStyle="yellow";
             ctx.moveTo(
                 this.rays[i][0].x,
@@ -103,7 +116,7 @@ class Sensor{
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.lineWidth=2;
+            ctx.lineWidth=picked?4:2;
             ctx.strokeStyle="black";
             ctx.moveTo(
                 this.rays[i][1].x,
@@ -114,6 +127,16 @@ class Sensor{
                 end.y
             );
             ctx.stroke();
+
+            // circle what the picked ray is touching
+            if(picked&&this.readings[i]){
+                ctx.beginPath();
+                ctx.arc(end.x,end.y,5,0,Math.PI*2);
+                ctx.lineWidth=2;
+                ctx.strokeStyle="white";
+                ctx.stroke();
+            }
+            ctx.restore();
         }
     }        
 }

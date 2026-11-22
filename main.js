@@ -97,6 +97,17 @@ mutationSlider.addEventListener("change",()=>{
         " applies "+when);
 });
 
+// the brain input under the mouse
+let hoveredInput=null;
+networkCanvas.addEventListener("pointermove",hoverInput);
+networkCanvas.addEventListener("pointerdown",hoverInput);
+networkCanvas.addEventListener("pointerleave",e=>{
+    if(e.pointerType!="touch"){
+        hoveredInput=null;
+        networkCanvas.style.cursor="";
+    }
+});
+
 // applies straight away and is kept across generations
 for(const option of SPEEDS){
     const radio=document.getElementById("speed"+option);
@@ -114,6 +125,15 @@ if(saveDiscarded){
 step();
 draw(0);
 requestAnimationFrame(animate);
+
+function hoverInput(e){
+    const rect=networkCanvas.getBoundingClientRect();
+    hoveredInput=Visualizer.inputAt(
+        (e.clientX-rect.left)*networkCanvas.width/rect.width,
+        (e.clientY-rect.top)*networkCanvas.height/rect.height
+    );
+    networkCanvas.style.cursor=hoveredInput===null?"":"help";
+}
 
 function loadSpeed(){
     const stored=Number(localStorage.getItem("speed"));
@@ -574,12 +594,12 @@ function draw(time){
         }
     }
     carCtx.globalAlpha=1;
-    bestCar.draw(carCtx,true);
+    bestCar.draw(carCtx,true,hoveredInput);
 
     carCtx.restore();
 
     drawStats(carCtx);
 
     networkCtx.lineDashOffset=-time/50;
-    Visualizer.drawNetwork(networkCtx,bestCar.brain);
+    Visualizer.drawNetwork(networkCtx,bestCar,hoveredInput);
 }
