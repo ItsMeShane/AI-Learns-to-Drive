@@ -16,8 +16,9 @@ class Car{
 
         if(controlType!="DUMMY"){
             this.sensor=new Sensor(this);
+            // one input per sensor ray, plus the car's own speed
             this.brain=new NeuralNetwork(
-                [this.sensor.rayCount,6,4]
+                [this.sensor.rayCount+1,6,4]
             );
         }
         this.controls=new Controls(controlType);
@@ -41,17 +42,20 @@ class Car{
     }
 
     update(roadBorders,traffic){
+        const wasDamaged=this.damaged;
         if(!this.damaged){
             this.#move();
             this.polygon=this.#createPolygon();
             this.damaged=this.#assessDamage(roadBorders,traffic);
         }
-        if(this.sensor){
+        if(this.sensor&&!wasDamaged){
             this.sensor.update(roadBorders,traffic);
             const offsets=this.sensor.readings.map(
                 s=>s==null?0:1-s.offset
             );
-            const outputs=NeuralNetwork.feedForward(offsets,this.brain);
+            // without its speed the brain can't tell whether it needs to brake
+            const inputs=[...offsets,this.speed/this.maxSpeed];
+            const outputs=NeuralNetwork.feedForward(inputs,this.brain);
 
             if(this.useBrain){
                 this.controls.forward=outputs[0];

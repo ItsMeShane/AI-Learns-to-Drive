@@ -2,6 +2,22 @@ function lerp(A,B,t){
     return A+(B-A)*t;
 }
 
+// a random number from a bell curve around 0: usually between -1 and 1,
+// rarely past -2 or 2 (the Box-Muller transform; 1-random avoids log(0))
+// puts the array in a random order, in place
+function shuffle(array){
+    for(let i=array.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [array[i],array[j]]=[array[j],array[i]];
+    }
+    return array;
+}
+
+function randomGaussian(){
+    return Math.sqrt(-2*Math.log(1-Math.random()))*
+        Math.cos(2*Math.PI*Math.random());
+}
+
 function getIntersection(A,B,C,D){ 
     const tTop=(D.x-C.x)*(A.y-C.y)-(D.y-C.y)*(A.x-C.x);
     const uTop=(C.y-A.y)*(A.x-B.x)-(C.x-A.x)*(A.y-B.y);

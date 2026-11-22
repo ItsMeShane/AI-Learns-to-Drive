@@ -9,31 +9,27 @@ class NeuralNetwork{
     }
 
     static feedForward(givenInputs,network){
-        let outputs=Level.feedForward(
-            givenInputs,network.levels[0]);
-        for(let i=1;i<network.levels.length;i++){
+        const last=network.levels.length-1;
+        let outputs=givenInputs;
+        for(let i=0;i<=last;i++){
             outputs=Level.feedForward(
-                outputs,network.levels[i]);
+                outputs,network.levels[i],i==last);
         }
         return outputs;
     }
 
-    static mutate(network,amount=1){
+    static mutate(network,amount=1,chance=0.1){
         network.levels.forEach(level => {
             for(let i=0;i<level.biases.length;i++){
-                level.biases[i]=lerp(
-                    level.biases[i],
-                    Math.random()*2-1,
-                    amount
-                )
+                if(Math.random()<chance){
+                    level.biases[i]+=randomGaussian()*amount;
+                }
             }
             for(let i=0;i<level.weights.length;i++){
                 for(let j=0;j<level.weights[i].length;j++){
-                    level.weights[i][j]=lerp(
-                        level.weights[i][j],
-                        Math.random()*2-1,
-                        amount
-                    )
+                    if(Math.random()<chance){
+                        level.weights[i][j]+=randomGaussian()*amount;
+                    }
                 }
             }
         });
@@ -66,7 +62,7 @@ class Level{
         }
     }
 
-    static feedForward(givenInputs,level){
+    static feedForward(givenInputs,level,isOutput){
         for(let i=0;i<level.inputs.length;i++){
             level.inputs[i]=givenInputs[i];
         }
@@ -77,11 +73,13 @@ class Level{
                 sum+=level.inputs[j]*level.weights[j][i];
             }
 
-            if(sum>level.biases[i]){
+            if(!isOutput){
+                level.outputs[i]=Math.tanh(sum-level.biases[i]);
+            }else if(sum>level.biases[i]){
                 level.outputs[i]=1;
             }else{
                 level.outputs[i]=0;
-            } 
+            }
         }
 
         return level.outputs;
